@@ -1,0 +1,14 @@
+{
+  "name": "motion-ai-classroom",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check app.js && node --check server.mjs && node --check service-worker.js && node --check scripts/build.mjs",
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^1.1.0"
+  }
+}

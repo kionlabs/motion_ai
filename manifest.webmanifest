@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "모션AI 연구소",
+  "short_name": "모션AI",
+  "description": "몸동작 데이터를 수집하고 자세 분류 AI를 만드는 수업용 웹앱",
+  "lang": "ko-KR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050b18",
+  "theme_color": "#07152f",
+  "icons": [
+    {
+      "src": "./icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

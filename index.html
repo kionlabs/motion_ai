@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07152f" />
+    <meta name="description" content="몸동작 데이터를 직접 수집하고 자세 분류 AI를 만드는 수업용 웹앱" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2307152f'/%3E%3Ccircle cx='32' cy='15' r='6' fill='%235eead4'/%3E%3Cpath d='M32 23v17M18 28l14 7 14-7M32 40 21 54M32 40l11 14' fill='none' stroke='%23f8fafc' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>모션AI 연구소</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <div><p class="eyebrow">MOTION AI LAB</p><h1>모션AI 연구소</h1></div>
+      <div class="header-actions"><span class="offline-badge" id="offline-badge"><i aria-hidden="true"></i><span>오프라인 준비 중</span></span><button class="group-button" id="group-button" type="button"><span id="group-button-label">모둠 설정</span></button><div class="status" id="app-status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="status-text">AI 모델 준비 중</span></div></div>
+    </header>
+    <main>
+      <nav class="steps" aria-label="활동 단계">
+        <span class="step active" data-step="1"><b>1</b> 기기 점검</span><span class="step" data-step="2"><b>2</b> 데이터 수집</span><span class="step" data-step="3"><b>3</b> AI 학습</span><span class="step" data-step="4"><b>4</b> 실시간 테스트</span><span class="step" data-step="5"><b>5</b> AI 미션</span>
+      </nav>
+      <section class="workspace" aria-labelledby="workspace-title">
+        <div class="camera-panel">
+          <div class="camera-frame" id="camera-frame">
+            <video id="camera" autoplay muted playsinline></video><canvas id="pose-canvas" aria-hidden="true"></canvas>
+            <div class="camera-placeholder"><span class="body-mark" aria-hidden="true">●</span><strong id="camera-message">AI 모델을 준비하고 있습니다</strong><p>영상과 학습 데이터는 이 기기 안에서만 처리됩니다.</p></div>
+            <div class="countdown" id="countdown" hidden></div>
+            <div class="prediction-chip" id="prediction-chip" hidden><span>AI 예측</span><strong id="prediction-name">확인 중</strong></div>
+          </div>
+          <button class="primary-button" id="camera-button" type="button" disabled>카메라 켜기</button>
+          <p class="camera-help" id="camera-help">모델을 처음 불러올 때 몇 초 정도 걸릴 수 있습니다.</p>
+        </div>
+        <aside class="control-panel">
+          <section id="setup-panel">
+            <p class="eyebrow">STEP 1</p><h2 id="workspace-title">카메라를 준비하세요</h2><p class="intro">전신이 화면 안에 들어오도록 기기에서 두세 걸음 떨어져 주세요.</p>
+            <ul class="check-list"><li><span>브라우저 기능</span><b id="check-browser">확인 중</b></li><li><span>AI 모델</span><b id="check-model">불러오는 중</b></li><li><span>카메라 권한</span><b id="check-camera">미확인</b></li><li><span>몸 관절 인식</span><b id="check-pose">대기 중</b></li></ul>
+            <div class="notice"><strong>개인정보 보호</strong><p>카메라 영상은 저장하거나 서버로 보내지 않습니다. 자세의 관절 좌표만 현재 브라우저 메모리에 보관합니다.</p></div>
+          </section>
+          <section id="training-panel" hidden>
+            <p class="eyebrow">STEP 2</p><h2>자세 데이터를 모으세요</h2><p class="intro">모둠원이 번갈아 참여하고, 몸의 위치와 팔 각도를 조금씩 바꿔보세요.</p>
+            <div class="class-list">
+              <article class="class-card" data-class="left"><div><span class="class-icon">L</span><strong>왼쪽</strong><small>왼팔을 옆으로 뻗기</small></div><span class="sample-count"><b id="count-left">0</b>/40</span><button type="button" data-collect="left">수집</button></article>
+              <article class="class-card" data-class="right"><div><span class="class-icon">R</span><strong>오른쪽</strong><small>오른팔을 옆으로 뻗기</small></div><span class="sample-count"><b id="count-right">0</b>/40</span><button type="button" data-collect="right">수집</button></article>
+              <article class="class-card" data-class="stop"><div><span class="class-icon">S</span><strong>정지</strong><small>두 팔을 자연스럽게 내리기</small></div><span class="sample-count"><b id="count-stop">0</b>/40</span><button type="button" data-collect="stop">수집</button></article>
+            </div>
+            <p class="feedback" id="training-feedback" aria-live="polite">세 자세를 각각 40개씩 모아주세요.</p>
+            <div class="action-row"><button class="secondary-button" id="reset-button" type="button">데이터 초기화</button><button class="primary-button compact" id="train-button" type="button" disabled>AI 학습하기</button></div>
+          </section>
+          <section id="result-panel" hidden>
+            <p class="eyebrow">STEP 4</p><h2>새로운 자세를 테스트하세요</h2><p class="intro">학습에 참여하지 않은 친구도 같은 자세로 잘 인식되는지 확인해보세요.</p>
+            <div class="result-name"><span>현재 AI의 판단</span><strong id="result-name">판단 중</strong></div>
+            <div class="probabilities"><label><span>왼쪽</span><progress id="prob-left" max="100" value="0"></progress><b id="prob-left-value">0%</b></label><label><span>오른쪽</span><progress id="prob-right" max="100" value="0"></progress><b id="prob-right-value">0%</b></label><label><span>정지</span><progress id="prob-stop" max="100" value="0"></progress><b id="prob-stop-value">0%</b></label></div>
+            <div class="evaluation-card">
+              <div class="evaluation-head"><div><span id="evaluation-phase">개선 전 테스트</span><strong id="evaluation-accuracy">기록 없음</strong></div><span id="evaluation-count">0회</span></div>
+              <p>의도한 자세와 AI의 판단이 일치했나요?</p>
+              <div class="evaluation-buttons"><button class="correct-button" id="correct-button" type="button">맞아요</button><button class="wrong-button" id="wrong-button" type="button">틀렸어요</button></div>
+              <button class="text-button" id="evaluation-reset-button" type="button">현재 테스트 기록 초기화</button>
+            </div>
+            <div class="notice experiment"><strong>모션AI전문가 미션</strong><p>개선 전 결과를 기록한 뒤 데이터를 보강하고, 같은 방법으로 다시 테스트하세요.</p></div>
+            <div class="action-row"><button class="secondary-button" id="improve-button" type="button" disabled>데이터 보강</button><button class="primary-button compact" id="mission-button" type="button">AI 미션 시작</button></div>
+            <button class="secondary-button full result-card-button" id="result-card-button" type="button">활동 결과 카드 보기</button>
+          </section>
+          <section id="mission-panel" hidden>
+            <div class="mission-head"><div><p class="eyebrow">STEP 5</p><h2>에너지 코어 수집</h2></div><div class="mission-stats"><span>남은 시간 <b id="mission-time">30</b></span><span>점수 <b id="mission-score">0</b></span></div></div>
+            <p class="intro">왼쪽·오른쪽 자세로 탐사선을 움직이세요. 정지 자세에서는 제자리에 멈춥니다.</p>
+            <div class="game-arena" id="game-arena" aria-label="자세로 조종하는 에너지 코어 수집 게임">
+              <div class="lane-grid" aria-hidden="true"></div>
+              <div class="energy-core" id="energy-core" aria-hidden="true"><span></span></div>
+              <div class="rover" id="rover" aria-label="탐사선"><span></span></div>
+              <div class="game-overlay" id="game-overlay"><strong>준비됐나요?</strong><p>자세 인식 결과가 조종 명령이 됩니다.</p><button class="primary-button compact" id="game-start-button" type="button">30초 도전 시작</button></div>
+            </div>
+            <p class="game-command" id="game-command">현재 명령 · 대기</p>
+            <div class="game-result" id="game-result" hidden><strong id="game-result-title">미션 완료</strong><p id="game-result-text"></p></div>
+            <div class="action-row mission-actions"><button class="secondary-button" id="mission-improve-button" type="button">데이터 개선</button><button class="secondary-button" id="retry-button" type="button">다시 도전</button></div>
+            <button class="secondary-button full result-card-button" id="mission-result-card-button" type="button">활동 결과 카드 보기</button>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <dialog class="modal" id="group-dialog" aria-labelledby="group-dialog-title">
+      <form id="group-form">
+        <div class="modal-head"><div><p class="eyebrow">GROUP INFO</p><h2 id="group-dialog-title">모둠 정보</h2></div><button class="icon-button" id="group-close-button" type="button" aria-label="닫기">×</button></div>
+        <p class="intro">개인 이름 대신 발표에 사용할 모둠 이름과 참여 인원만 입력하세요.</p>
+        <label class="field"><span>모둠 이름</span><input id="group-name-input" name="groupName" maxlength="20" placeholder="예: 3모둠 · 포즈메이커" required /></label>
+        <label class="field"><span>참여 인원</span><input id="group-size-input" name="groupSize" type="number" min="1" max="8" value="3" required /></label>
+        <button class="primary-button" type="submit">저장하기</button>
+        <div class="reset-zone"><div><strong>다음 모둠 준비</strong><p>현재 기기의 자세 데이터와 활동 결과를 모두 지웁니다.</p></div><button class="danger-button" id="new-activity-button" type="button">전체 초기화</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="modal result-modal" id="result-dialog" aria-labelledby="result-dialog-title">
+      <div class="result-sheet" id="result-sheet">
+        <div class="sheet-top"><div><p class="eyebrow">MOTION AI LAB · ACTIVITY REPORT</p><h2 id="result-dialog-title">모션AI 활동 결과</h2></div><span id="card-date"></span></div>
+        <div class="group-summary"><strong id="card-group-name">모둠 이름 미설정</strong><span id="card-group-size">참여 인원 3명</span></div>
+        <div class="comparison">
+          <article><span>개선 전</span><strong id="card-before-accuracy">기록 없음</strong><small id="card-before-detail">정답 0 / 0회</small></article>
+          <div class="improvement"><span>향상 폭</span><strong id="card-improvement">—</strong></div>
+          <article class="after"><span>개선 후</span><strong id="card-after-accuracy">기록 없음</strong><small id="card-after-detail">정답 0 / 0회</small></article>
+        </div>
+        <div class="sheet-metrics"><div><span>학습 데이터</span><strong id="card-samples">120개</strong></div><div><span>미션 최고점</span><strong id="card-best-score">0개</strong></div><div><span>실험 횟수</span><strong id="card-tests">0회</strong></div></div>
+        <div class="sheet-conclusion"><span>우리 모둠의 발견</span><p id="card-conclusion">테스트 결과를 기록하면 AI 모델의 개선 효과를 확인할 수 있습니다.</p></div>
+      </div>
+      <div class="modal-actions"><button class="secondary-button" id="result-close-button" type="button">닫기</button><button class="primary-button compact" id="print-button" type="button">인쇄·PDF 저장</button></div>
+    </dialog>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
