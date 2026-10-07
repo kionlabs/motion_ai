@@ -19,6 +19,8 @@ h2 { margin-bottom: 10px; font-size: clamp(1.5rem,3vw,2rem); }
 .offline-badge[data-state="error"] i { background: #fb7185; box-shadow: 0 0 8px #fb7185; }
 .group-button { min-height: 42px; padding: 0 15px; border: 1px solid #31517a; border-radius: 999px; background: #0b1930; color: #99f6e4; font-weight: 800; cursor: pointer; }
 .group-button:hover { border-color: #5eead4; }
+.career-link { display: inline-flex; align-items: center; min-height: 42px; padding: 0 15px; border: 1px solid #5eead4; border-radius: 999px; background: rgba(13,148,136,.16); color: #ccfbf1; font-size: .86rem; font-weight: 850; text-decoration: none; }
+.career-link:hover { background: rgba(13,148,136,.3); }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 12px #fbbf24; }
 .status.ready .status-dot { background: #5eead4; box-shadow: 0 0 12px #5eead4; }
 .status.error .status-dot { background: #fb7185; box-shadow: 0 0 12px #fb7185; }

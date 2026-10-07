@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07152f" />
+    <meta name="description" content="진로 카드를 선택하고 사용자 문제를 해결하는 모션AI 프로젝트" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icons/app-icon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./career.css" />
+    <title>모션AI 진로 프로젝트</title>
+  </head>
+  <body class="career-page">
+    <header class="topbar career-topbar">
+      <div><p class="eyebrow">MOTION AI CAREER PROJECT</p><h1>2차시 · 진로 프로젝트</h1></div>
+      <div class="header-actions">
+        <span class="offline-badge" id="career-offline-badge"><i aria-hidden="true"></i><span>오프라인 준비 중</span></span>
+        <a class="career-link back-link" href="./index.html">1차시 기본 실습</a>
+        <div class="status" id="career-status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="career-status-text">의뢰 선택 대기</span></div>
+      </div>
+    </header>
+
+    <main class="career-main">
+      <nav class="steps career-steps" aria-label="2차시 활동 단계">
+        <span class="step active" data-career-step="1"><b>1</b> 의뢰 선택</span>
+        <span class="step" data-career-step="2"><b>2</b> 동작 설계</span>
+        <span class="step" data-career-step="3"><b>3</b> AI 학습</span>
+        <span class="step" data-career-step="4"><b>4</b> 프로토타입</span>
+        <span class="step" data-career-step="5"><b>5</b> 제안 발표</span>
+      </nav>
+
+      <section class="career-intro" aria-labelledby="career-title">
+        <div><p class="eyebrow">STEP 1 · CLIENT BRIEF</p><h2 id="career-title">어떤 사용자의 문제를 해결할까요?</h2><p>모둠마다 한 가지 의뢰를 고르고 세 동작으로 작동하는 모션 도구를 만드세요.</p></div>
+        <div class="career-time"><span>2차시</span><strong>45분</strong></div>
+      </section>
+
+      <section class="career-grid" id="career-grid" aria-label="진로 카드 선택"></section>
+
+      <section class="career-project" id="career-project" hidden aria-labelledby="project-title">
+        <div class="project-brief">
+          <div class="project-symbol" id="project-symbol" aria-hidden="true">🎮</div>
+          <div><p class="eyebrow" id="project-company">게임 회사</p><h2 id="project-title">몸으로 조종하는 게임</h2><p id="project-problem"></p></div>
+          <button class="secondary-button change-career-button" id="change-career-button" type="button">다른 의뢰 선택</button>
+        </div>
+
+        <div class="career-workspace">
+          <section class="career-camera-panel">
+            <div class="camera-frame career-camera-frame" id="career-camera-frame">
+              <video id="career-camera" autoplay muted playsinline></video>
+              <canvas id="career-pose-canvas" aria-hidden="true"></canvas>
+              <div class="camera-placeholder"><span class="body-mark" aria-hidden="true">●</span><strong id="career-camera-message">AI 모델을 준비하고 있습니다</strong><p>카메라 영상은 저장하거나 서버로 보내지 않습니다.</p></div>
+              <div class="countdown" id="career-countdown" hidden></div>
+              <div class="prediction-chip" id="career-prediction-chip" hidden><span>프로토타입 명령</span><strong id="career-prediction-name">확인 중</strong></div>
+            </div>
+            <button class="primary-button" id="career-camera-button" type="button" disabled>카메라 켜기</button>
+            <p class="camera-help" id="career-camera-help">모둠의 의뢰와 동작을 먼저 확인하세요.</p>
+          </section>
+
+          <aside class="career-control-panel">
+            <section id="career-design-panel">
+              <p class="eyebrow">STEP 2 · MOTION DESIGN</p><h2>세 동작을 설계하세요</h2>
+              <label class="career-field"><span>모둠 이름</span><input id="career-team-name" maxlength="20" placeholder="예: 2모둠 · 모션메이커" /></label>
+              <div class="user-brief"><span>사용자 상황</span><p id="project-user"></p><strong id="project-goal"></strong></div>
+              <div class="career-class-list" id="career-class-list"></div>
+              <p class="feedback" id="career-training-feedback">카메라를 켜고 각 동작을 25개씩 모아주세요.</p>
+              <div class="action-row"><button class="secondary-button" id="career-reset-button" type="button">데이터 초기화</button><button class="primary-button compact" id="career-train-button" type="button" disabled>프로토타입 학습</button></div>
+            </section>
+
+            <section id="career-test-panel" hidden>
+              <p class="eyebrow">STEP 4 · PROTOTYPE TEST</p><h2>사용자 상황으로 시험하세요</h2>
+              <div class="product-preview" id="product-preview"><span class="preview-icon" id="preview-icon">🎮</span><strong id="preview-output">동작을 보여주세요</strong><small id="preview-detail">AI의 판단이 제품 반응으로 바뀝니다.</small></div>
+              <div class="career-probabilities" id="career-probabilities"></div>
+              <div class="career-evaluation">
+                <div><span>사용자 테스트</span><strong id="career-test-accuracy">기록 없음</strong></div>
+                <p>원하는 반응이 나왔나요?</p>
+                <div class="evaluation-buttons"><button class="correct-button" id="career-correct-button" type="button">성공</button><button class="wrong-button" id="career-wrong-button" type="button">오류</button></div>
+                <small id="career-test-count">0회 시험</small>
+              </div>
+              <label class="career-field"><span>발견한 오류 또는 개선 아이디어</span><textarea id="career-reflection" rows="3" maxlength="120" placeholder="예: 앉은 학생의 동작도 데이터에 추가해야 한다."></textarea></label>
+              <button class="primary-button" id="career-report-button" type="button">제안 카드 만들기</button>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal career-report-modal" id="career-report-dialog" aria-labelledby="career-report-title">
+      <div class="career-report-sheet" id="career-report-sheet">
+        <div class="sheet-top"><div><p class="eyebrow">MOTION AI · PRODUCT PROPOSAL</p><h2 id="career-report-title">모션 도구 제안서</h2></div><span id="career-report-date"></span></div>
+        <div class="report-client"><span id="report-symbol">🎮</span><div><small id="report-company">게임 회사</small><strong id="report-project-title">몸으로 조종하는 게임</strong></div></div>
+        <div class="report-team"><span>모둠</span><strong id="report-team-name">이름 미설정</strong><span>사용자 테스트</span><strong id="report-accuracy">기록 없음</strong></div>
+        <div class="report-problem"><span>해결하려는 문제</span><p id="report-problem"></p></div>
+        <div class="report-motions" id="report-motions"></div>
+        <div class="report-reflection"><span>다음 개선</span><p id="report-reflection">사용자 테스트에서 발견한 내용을 입력하세요.</p></div>
+        <p class="report-pitch" id="report-pitch"></p>
+      </div>
+      <div class="modal-actions"><button class="secondary-button" id="career-report-close" type="button">닫기</button><button class="primary-button compact" id="career-print-button" type="button">인쇄·PDF 저장</button></div>
+    </dialog>
+
+    <script type="module" src="./career.js"></script>
+  </body>
+</html>

@@ -8,6 +8,9 @@ const files = [
   "index.html",
   "styles.css",
   "app.js",
+  "career.html",
+  "career.css",
+  "career.js",
   "manifest.webmanifest",
   "service-worker.js"
 ];

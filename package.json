@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check app.js && node --check server.mjs && node --check service-worker.js && node --check scripts/build.mjs && node --check scripts/generate-student-qr.mjs && node --check scripts/load-test.mjs",
+    "check": "node --check app.js && node --check career.js && node --check server.mjs && node --check service-worker.js && node --check scripts/build.mjs && node --check scripts/generate-student-qr.mjs && node --check scripts/load-test.mjs",
     "build": "node scripts/build.mjs",
     "qr": "node scripts/generate-student-qr.mjs",
     "load-test": "node scripts/load-test.mjs"
