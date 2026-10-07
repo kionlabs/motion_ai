@@ -64,3 +64,31 @@ npm run build
 ```
 
 완성된 정적 파일은 `dist` 폴더에 생성되며 Git에는 포함하지 않습니다.
+
+## 학생용 QR 코드
+
+학생용 접속 주소는 `https://kionlabs.github.io/motion_ai/`입니다. 교실 화면 공유에는
+`teacher-assets/motion-ai-student-qr.png`, 인쇄물 편집에는 확대해도 선명한
+`teacher-assets/motion-ai-student-qr.svg`를 사용합니다.
+
+공개 주소가 바뀌면 `scripts/generate-student-qr.mjs`의 `studentUrl`을 수정한 뒤 다음
+명령으로 QR 이미지를 다시 만듭니다.
+
+```powershell
+npm run qr
+```
+
+## 동시 접속 시험
+
+기본 시험은 가상 학생 24명이 화면 파일에 동시에 접속하고, 그중 8명이 AI 모델을
+동시에 초기화하는 상황을 확인합니다.
+
+```powershell
+npm run load-test
+```
+
+학생 수와 AI 동시 초기화 인원은 순서대로 변경할 수 있습니다.
+
+```powershell
+node scripts/load-test.mjs https://kionlabs.github.io/motion_ai/ 24 8
+```

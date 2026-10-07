@@ -1,23 +1,16 @@
-const CACHE_NAME = "motion-ai-classroom-v1";
-const CORE_ASSETS = [
+const CACHE_NAME = "motion-ai-classroom-v2";
+const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
   "./icons/app-icon.svg",
-  "./vendor/vision_bundle.mjs",
-  "./vendor/wasm/vision_wasm_internal.js",
-  "./vendor/wasm/vision_wasm_internal.wasm",
-  "./vendor/wasm/vision_wasm_module_internal.js",
-  "./vendor/wasm/vision_wasm_module_internal.wasm",
-  "./vendor/wasm/vision_wasm_nosimd_internal.js",
-  "./vendor/wasm/vision_wasm_nosimd_internal.wasm",
-  "./models/pose_landmarker_lite.task"
+  "./vendor/vision_bundle.mjs"
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
