@@ -25,6 +25,7 @@
 - 기존 실습과 분리된 2차시 진로 프로젝트 메뉴
 - 게임·병원·스마트홈·공연·접근성·스포츠 분야의 모션AI 의뢰 카드
 - 진로 카드별 동작 설계, 데이터 학습, 프로토타입 시험과 제안 카드
+- Supabase 수업 코드로 모둠 결과 제출 및 실시간 랭킹 조회
 
 ## 실행
 
@@ -37,6 +38,10 @@ npm start
 브라우저에서 `http://127.0.0.1:8080`을 엽니다.
 
 1차시 기본 실습은 `/index.html`, 2차시 진로 프로젝트는 `/career.html`에서 실행합니다.
+
+## Supabase 데이터베이스 준비
+
+`supabase/migrations/202610080001_motion_ai_schema.sql`을 Supabase SQL Editor에서 실행하고 API의 Exposed schemas에 `motion_ai`를 추가합니다. 수업 생성 SQL과 개인정보 보호 원칙은 `supabase/README.md`에 정리되어 있습니다.
 
 ## 예정 구조
 

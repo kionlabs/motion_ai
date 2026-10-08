@@ -11,6 +11,8 @@ const files = [
   "career.html",
   "career.css",
   "career.js",
+  "supabase-config.js",
+  "supabase-client.js",
   "manifest.webmanifest",
   "service-worker.js"
 ];

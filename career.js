@@ -1,8 +1,10 @@
 import { DrawingUtils, FilesetResolver, PoseLandmarker } from "./vendor/vision_bundle.mjs";
+import { getLeaderboard, registerTeam, submitProjectResult } from "./supabase-client.js";
 
 const TARGET_SAMPLES = 25;
 const K_NEIGHBORS = 7;
 const STORAGE_KEY = "motion-ai-career-project-v1";
+const MEMBERSHIP_KEY = "motion-ai-class-membership-v1";
 const CLASS_IDS = ["a", "b", "c"];
 
 const SCENARIOS = {
@@ -138,7 +140,17 @@ const elements = {
   reportPitch: document.querySelector("#report-pitch"),
   status: document.querySelector("#career-status"),
   statusText: document.querySelector("#career-status-text"),
-  offlineBadge: document.querySelector("#career-offline-badge")
+  offlineBadge: document.querySelector("#career-offline-badge"),
+  classCode: document.querySelector("#career-class-code"),
+  participantCount: document.querySelector("#career-participant-count"),
+  joinButton: document.querySelector("#career-join-button"),
+  rankingButton: document.querySelector("#career-ranking-button"),
+  syncMessage: document.querySelector("#career-sync-message"),
+  submitButton: document.querySelector("#career-submit-button"),
+  rankingDialog: document.querySelector("#career-ranking-dialog"),
+  rankingClose: document.querySelector("#career-ranking-close"),
+  rankingRefresh: document.querySelector("#career-ranking-refresh"),
+  rankingList: document.querySelector("#career-ranking-list")
 };
 
 const stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "{}");
@@ -155,8 +167,14 @@ const state = {
     correct: Number(stored.evaluation?.correct) || 0,
     wrong: Number(stored.evaluation?.wrong) || 0
   },
+  initialAccuracy: Number.isFinite(Number(stored.initialAccuracy)) ? Number(stored.initialAccuracy) : null,
+  improvementCount: Number(stored.improvementCount) || 0,
+  participantCount: Math.max(1, Math.min(20, Number(stored.participantCount) || 4)),
   reflection: typeof stored.reflection === "string" ? stored.reflection : ""
 };
+
+let membership;
+try { membership = JSON.parse(localStorage.getItem(MEMBERSHIP_KEY) || "null"); } catch { membership = null; }
 
 let poseLandmarker;
 let drawingUtils;
@@ -172,6 +190,7 @@ function saveState() { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)
 function delay(milliseconds) { return new Promise((resolve) => window.setTimeout(resolve, milliseconds)); }
 function setStatus(text, type = "") { elements.status.className = `status ${type}`.trim(); elements.statusText.textContent = text; }
 function setOfflineBadge(text, type) { elements.offlineBadge.dataset.state = type; elements.offlineBadge.querySelector("span").textContent = text; }
+function setSyncMessage(text, type = "") { elements.syncMessage.className = `sync-message ${type}`.trim(); elements.syncMessage.textContent = text; }
 function setStep(step) {
   document.querySelectorAll("[data-career-step]").forEach((item) => {
     const value = Number(item.dataset.careerStep);
@@ -237,6 +256,8 @@ function resetProjectData() {
   CLASS_IDS.forEach((id) => { state.samples[id] = []; });
   state.gestures = {};
   state.evaluation = { correct: 0, wrong: 0 };
+  state.initialAccuracy = null;
+  state.improvementCount = 0;
   state.reflection = "";
   modelTrained = false;
   lastPrediction = undefined;
@@ -248,7 +269,14 @@ function resetProjectData() {
 
 function selectCareer(id) {
   if (!SCENARIOS[id]) return;
-  if (state.scenarioId !== id) resetProjectData();
+  if (state.scenarioId !== id) {
+    resetProjectData();
+    if (membership) {
+      membership = null;
+      localStorage.removeItem(MEMBERSHIP_KEY);
+      setSyncMessage("진로 카드가 바뀌어 수업 참가 정보를 초기화했습니다. 다시 참가해 주세요.");
+    }
+  }
   state.scenarioId = id;
   saveState();
   renderCareerCards();
@@ -447,6 +475,12 @@ async function trainPrototype() {
 }
 
 function resetSamples() {
+  const previousStats = getTestStats();
+  if (modelTrained && previousStats.total > 0) {
+    if (state.initialAccuracy === null) state.initialAccuracy = previousStats.accuracy;
+    state.improvementCount += 1;
+    state.evaluation = { correct: 0, wrong: 0 };
+  }
   CLASS_IDS.forEach((id) => { state.samples[id] = []; });
   modelTrained = false;
   lastPrediction = undefined;
@@ -454,6 +488,7 @@ function resetSamples() {
   renderMotionCards();
   updateCounts();
   elements.predictionChip.hidden = true;
+  updateEvaluation();
   setStep(2);
 }
 
@@ -470,6 +505,8 @@ function updateEvaluation() {
 
 function recordTest(correct) {
   state.evaluation[correct ? "correct" : "wrong"] += 1;
+  const stats = getTestStats();
+  if (stats.total === 5 && state.initialAccuracy === null) state.initialAccuracy = stats.accuracy;
   saveState();
   updateEvaluation();
 }
@@ -502,6 +539,106 @@ function openReport() {
   elements.reportDialog.showModal();
 }
 
+async function joinLiveClass() {
+  const classCode = elements.classCode.value.trim().toUpperCase();
+  const teamName = elements.teamName.value.trim();
+  if (!state.scenarioId) { setSyncMessage("먼저 진로 카드를 선택하세요.", "error"); return; }
+  if (!teamName) { setSyncMessage("선택한 프로젝트의 모둠 이름을 입력하세요.", "error"); elements.teamName.focus(); return; }
+  if (!classCode) { setSyncMessage("교사가 알려준 수업 코드를 입력하세요.", "error"); elements.classCode.focus(); return; }
+
+  elements.joinButton.disabled = true;
+  setSyncMessage("수업 참가 정보를 확인하고 있습니다…");
+  try {
+    const response = await registerTeam(classCode, teamName, state.scenarioId);
+    const joined = Array.isArray(response) ? response[0] : response;
+    membership = {
+      classCode,
+      teamId: joined.team_id,
+      teamToken: joined.team_token,
+      sessionTitle: joined.session_title,
+      teamName,
+      scenarioId: state.scenarioId
+    };
+    localStorage.setItem(MEMBERSHIP_KEY, JSON.stringify(membership));
+    setSyncMessage(`${joined.session_title} · ${teamName} 참가 완료`, "success");
+    elements.joinButton.textContent = "참가 완료";
+  } catch (error) {
+    console.error(error);
+    setSyncMessage(error.message, "error");
+  } finally { elements.joinButton.disabled = false; }
+}
+
+async function submitToRanking() {
+  updateReport();
+  const stats = getTestStats();
+  if (!membership || membership.scenarioId !== state.scenarioId) {
+    elements.reportDialog.close();
+    setSyncMessage("수업에 먼저 참가한 뒤 결과를 제출하세요.", "error");
+    elements.classCode.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (!stats.total) { setStatus("사용자 시험을 한 번 이상 기록하세요", "error"); return; }
+
+  elements.submitButton.disabled = true;
+  elements.submitButton.textContent = "제출 중…";
+  try {
+    const response = await submitProjectResult(membership.teamId, membership.teamToken, {
+      initialAccuracy: state.initialAccuracy ?? stats.accuracy,
+      finalAccuracy: stats.accuracy,
+      correctCount: state.evaluation.correct,
+      wrongCount: state.evaluation.wrong,
+      improvementCount: state.improvementCount,
+      participantCount: state.participantCount,
+      reflection: state.reflection
+    });
+    const result = Array.isArray(response) ? response[0] : response;
+    setStatus(`랭킹 제출 완료 · 현재 ${result.total_score}점`, "ready");
+    setSyncMessage(`${membership.teamName} 결과가 저장되었습니다.`, "success");
+    elements.submitButton.textContent = "제출 완료";
+  } catch (error) {
+    console.error(error);
+    setStatus("랭킹 제출 실패", "error");
+    setSyncMessage(error.message, "error");
+    elements.submitButton.textContent = "다시 제출";
+  } finally { elements.submitButton.disabled = false; }
+}
+
+function renderLeaderboard(rows) {
+  if (!rows.length) {
+    elements.rankingList.innerHTML = '<p class="empty-ranking">아직 제출된 모둠 결과가 없습니다.</p>';
+    return;
+  }
+  elements.rankingList.innerHTML = rows.map((row) => {
+    const item = SCENARIOS[row.scenario_id];
+    return `<article class="ranking-row${Number(row.rank) <= 3 ? " top" : ""}">
+      <span class="ranking-rank">${row.rank}위</span>
+      <div class="ranking-team"><strong>${escapeAttribute(row.team_name)}</strong><small>${item?.icon || "🤖"} ${item?.company || "모션AI 프로젝트"}</small></div>
+      <div class="ranking-metric">정확도<b>${row.final_accuracy}%</b></div>
+      <div class="ranking-metric">개선<b>+${row.improvement}%p</b></div>
+      <div class="ranking-metric">시험<b>${row.test_count}회</b></div>
+      <strong class="ranking-score">${row.total_score}점</strong>
+    </article>`;
+  }).join("");
+}
+
+async function refreshLeaderboard() {
+  const classCode = (elements.classCode.value.trim() || membership?.classCode || "").toUpperCase();
+  if (!classCode) {
+    elements.rankingList.innerHTML = '<p class="empty-ranking">교사가 알려준 수업 코드를 먼저 입력하세요.</p>';
+    return;
+  }
+  elements.rankingRefresh.disabled = true;
+  elements.rankingList.innerHTML = '<p class="empty-ranking">랭킹을 불러오는 중입니다…</p>';
+  try { renderLeaderboard(await getLeaderboard(classCode)); }
+  catch (error) { elements.rankingList.innerHTML = `<p class="empty-ranking">${escapeAttribute(error.message)}</p>`; }
+  finally { elements.rankingRefresh.disabled = false; }
+}
+
+function openLeaderboard() {
+  elements.rankingDialog.showModal();
+  refreshLeaderboard();
+}
+
 async function setupOfflineMode() {
   if (!("serviceWorker" in navigator)) { setOfflineBadge("오프라인 미지원", "error"); return; }
   try {
@@ -526,6 +663,12 @@ elements.classList.addEventListener("input", (event) => {
 });
 elements.teamName.addEventListener("input", () => { state.teamName = elements.teamName.value; saveState(); });
 elements.reflection.addEventListener("input", () => { state.reflection = elements.reflection.value; saveState(); });
+elements.classCode.addEventListener("input", () => { elements.classCode.value = elements.classCode.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); });
+elements.participantCount.addEventListener("change", () => {
+  state.participantCount = Math.max(1, Math.min(20, Number(elements.participantCount.value) || 1));
+  elements.participantCount.value = state.participantCount;
+  saveState();
+});
 elements.changeCareerButton.addEventListener("click", () => { stopCamera(); elements.project.hidden = true; setStep(1); setStatus("새 의뢰를 선택하세요"); window.scrollTo({ top: 0, behavior: "smooth" }); });
 elements.cameraButton.addEventListener("click", toggleCamera);
 elements.trainButton.addEventListener("click", trainPrototype);
@@ -534,6 +677,11 @@ elements.correctButton.addEventListener("click", () => recordTest(true));
 elements.wrongButton.addEventListener("click", () => recordTest(false));
 elements.reportButton.addEventListener("click", openReport);
 elements.reportClose.addEventListener("click", () => elements.reportDialog.close());
+elements.joinButton.addEventListener("click", joinLiveClass);
+elements.submitButton.addEventListener("click", submitToRanking);
+elements.rankingButton.addEventListener("click", openLeaderboard);
+elements.rankingRefresh.addEventListener("click", refreshLeaderboard);
+elements.rankingClose.addEventListener("click", () => elements.rankingDialog.close());
 elements.printButton.addEventListener("click", () => window.print());
 window.addEventListener("online", () => setOfflineBadge("오프라인 준비 완료", "ready"));
 window.addEventListener("offline", () => setOfflineBadge("오프라인 실행 중", "offline"));
@@ -541,5 +689,11 @@ window.addEventListener("beforeunload", stopCamera);
 
 renderCareerCards();
 if (state.scenarioId) { renderProject(); setStep(2); }
+elements.participantCount.value = state.participantCount;
+if (membership) {
+  elements.classCode.value = membership.classCode || "";
+  elements.joinButton.textContent = "참가 완료";
+  setSyncMessage(`${membership.sessionTitle} · ${membership.teamName} 참가 중`, "success");
+}
 setupOfflineMode();
 initializePoseModel();

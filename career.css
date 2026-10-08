@@ -7,6 +7,16 @@
 .career-time { min-width: 110px; padding: 14px 18px; border: 1px solid #2b4368; border-radius: 15px; background: #0b1930; text-align: center; }
 .career-time span { display: block; color: #8fa2bc; font-size: .76rem; font-weight: 800; }
 .career-time strong { display: block; margin-top: 2px; color: #5eead4; font-size: 1.55rem; }
+.class-sync-panel { display: grid; grid-template-columns: minmax(280px,1fr) 170px 105px 120px 130px; align-items: end; gap: 12px; margin-bottom: 22px; padding: 18px 20px; border: 1px solid #2c476e; border-radius: 18px; background: linear-gradient(110deg,rgba(45,212,191,.1),#0a1930 55%); }
+.class-sync-panel h2 { margin: 2px 0 6px; font-size: 1.15rem; }
+.class-sync-panel > div > p:last-child { margin: 0; color: #91a4bd; font-size: .82rem; line-height: 1.45; }
+.class-sync-panel label { display: grid; gap: 6px; color: #9fb0c7; font-size: .76rem; font-weight: 800; }
+.class-sync-panel input { min-width: 0; height: 44px; padding: 0 11px; border: 1px solid #365379; border-radius: 10px; background: #071121; color: #fff; font: inherit; text-transform: uppercase; }
+.class-sync-panel input:focus { outline: 0; border-color: #5eead4; box-shadow: 0 0 0 3px rgba(94,234,212,.14); }
+.class-sync-panel button { min-height: 44px; padding: 9px 12px; }
+.sync-message { grid-column: 2 / -1; margin: 0; color: #8fa2bc; font-size: .78rem; }
+.sync-message.success { color: #5eead4; }
+.sync-message.error { color: #fca5a5; }
 .career-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin-bottom: 24px; }
 .career-card { min-height: 220px; padding: 22px; border: 1px solid #253a5d; border-radius: 20px; background: linear-gradient(145deg,#0d1d38,#081426); color: #f8fafc; text-align: left; cursor: pointer; transition: transform .18s,border-color .18s,background .18s; }
 .career-card:hover { transform: translateY(-3px); border-color: #5eead4; background: linear-gradient(145deg,#102944,#09182e); }
@@ -82,8 +92,24 @@
 .report-motion span, .report-motion small { display: block; color: #8296b0; }
 .report-motion strong { display: block; margin: 5px 0; color: #fff; }
 .report-pitch { margin: 16px 0 0; padding: 16px; border: 1px solid #fbbf24; border-radius: 14px; color: #fef3c7; background: rgba(245,158,11,.08); font-weight: 750; line-height: 1.6; }
+.ranking-modal { width: min(94vw,860px); }
+.ranking-sheet { padding: 28px; background: #09162a; }
+.ranking-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.ranking-note { color: #91a4bd; font-size: .84rem; }
+.ranking-list { display: grid; gap: 9px; margin: 20px 0; }
+.ranking-row { display: grid; grid-template-columns: 54px minmax(150px,1fr) 110px repeat(3,82px); align-items: center; gap: 10px; padding: 13px 15px; border: 1px solid #294164; border-radius: 13px; background: #0b1930; }
+.ranking-row.top { border-color: #fbbf24; background: linear-gradient(100deg,rgba(245,158,11,.12),#0b1930 42%); }
+.ranking-rank { color: #5eead4; font-size: 1.15rem; font-weight: 900; }
+.ranking-team strong, .ranking-team small { display: block; }
+.ranking-team small { margin-top: 3px; color: #8296b0; }
+.ranking-metric { color: #8fa2bc; font-size: .73rem; text-align: right; }
+.ranking-metric b { display: block; margin-top: 3px; color: #fff; font-size: .93rem; }
+.ranking-score { color: #fbbf24; font-size: 1.12rem; font-weight: 900; text-align: right; }
+.empty-ranking { padding: 40px 20px; border: 1px dashed #365379; border-radius: 14px; color: #91a4bd; text-align: center; }
 
 @media (max-width: 980px) {
+  .class-sync-panel { grid-template-columns: 1fr 1fr; }
+  .class-sync-panel > div, .sync-message { grid-column: 1 / -1; }
   .career-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .career-workspace { grid-template-columns: 1fr; }
   .career-camera-frame { min-height: 430px; }
@@ -94,12 +120,16 @@
   .career-topbar .header-actions { align-items: stretch; flex-direction: column; }
   .career-topbar .header-actions > * { justify-content: center; }
   .career-grid { grid-template-columns: 1fr; }
+  .class-sync-panel { grid-template-columns: 1fr; }
+  .class-sync-panel > *, .sync-message { grid-column: 1; }
   .career-intro { align-items: flex-start; }
   .project-brief { grid-template-columns: auto 1fr; }
   .change-career-button { grid-column: 1 / -1; }
   .career-control-panel { padding: 23px; }
   .career-camera-frame { min-height: 320px; }
   .report-team, .report-motions { grid-template-columns: 1fr; }
+  .ranking-row { grid-template-columns: 42px 1fr auto; }
+  .ranking-row .ranking-metric { display: none; }
 }
 
 @media print {

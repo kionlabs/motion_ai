@@ -1,4 +1,4 @@
-const CACHE_NAME = "motion-ai-classroom-v3";
+const CACHE_NAME = "motion-ai-classroom-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,8 @@ const APP_SHELL = [
   "./career.html",
   "./career.css",
   "./career.js",
+  "./supabase-config.js",
+  "./supabase-client.js",
   "./manifest.webmanifest",
   "./icons/app-icon.svg",
   "./vendor/vision_bundle.mjs"

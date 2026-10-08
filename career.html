@@ -35,6 +35,15 @@
         <div class="career-time"><span>2차시</span><strong>45분</strong></div>
       </section>
 
+      <section class="class-sync-panel" aria-labelledby="class-sync-title">
+        <div><p class="eyebrow">LIVE CLASS</p><h2 id="class-sync-title">수업 랭킹에 참가하기</h2><p>교사가 알려준 수업 코드와 모둠 이름으로 참가하세요. 영상과 관절 좌표는 전송하지 않습니다.</p></div>
+        <label><span>수업 코드</span><input id="career-class-code" maxlength="10" placeholder="예: MOTION1" autocomplete="off" /></label>
+        <label><span>참여 인원</span><input id="career-participant-count" type="number" min="1" max="20" value="4" /></label>
+        <button class="primary-button compact" id="career-join-button" type="button">수업 참가</button>
+        <button class="secondary-button" id="career-ranking-button" type="button">실시간 랭킹</button>
+        <p class="sync-message" id="career-sync-message" aria-live="polite">진로 카드와 모둠 이름을 정한 뒤 참가할 수 있습니다.</p>
+      </section>
+
       <section class="career-grid" id="career-grid" aria-label="진로 카드 선택"></section>
 
       <section class="career-project" id="career-project" hidden aria-labelledby="project-title">
@@ -95,7 +104,16 @@
         <div class="report-reflection"><span>다음 개선</span><p id="report-reflection">사용자 테스트에서 발견한 내용을 입력하세요.</p></div>
         <p class="report-pitch" id="report-pitch"></p>
       </div>
-      <div class="modal-actions"><button class="secondary-button" id="career-report-close" type="button">닫기</button><button class="primary-button compact" id="career-print-button" type="button">인쇄·PDF 저장</button></div>
+      <div class="modal-actions"><button class="secondary-button" id="career-report-close" type="button">닫기</button><button class="secondary-button" id="career-submit-button" type="button">랭킹에 결과 제출</button><button class="primary-button compact" id="career-print-button" type="button">인쇄·PDF 저장</button></div>
+    </dialog>
+
+    <dialog class="modal ranking-modal" id="career-ranking-dialog" aria-labelledby="career-ranking-title">
+      <div class="ranking-sheet">
+        <div class="ranking-heading"><div><p class="eyebrow">MOTION AI CHALLENGE</p><h2 id="career-ranking-title">실시간 모둠 랭킹</h2></div><button class="secondary-button" id="career-ranking-close" type="button">닫기</button></div>
+        <p class="ranking-note">자동 점수 75점과 교사평가 25점을 합산합니다. 같은 점수는 공동 순위입니다.</p>
+        <div class="ranking-list" id="career-ranking-list"><p class="empty-ranking">수업 코드를 입력하면 랭킹을 확인할 수 있습니다.</p></div>
+        <button class="primary-button compact" id="career-ranking-refresh" type="button">새로고침</button>
+      </div>
     </dialog>
 
     <script type="module" src="./career.js"></script>
