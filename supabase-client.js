@@ -24,8 +24,8 @@ export function registerTeam(classCode, teamName, scenarioId) {
   });
 }
 
-export function submitProjectResult(teamId, teamToken, result) {
-  return callRpc("submit_project_result", {
+export function submitChallengeResult(teamId, teamToken, result) {
+  return callRpc("submit_challenge_result", {
     p_team_id: teamId,
     p_team_token: teamToken,
     p_initial_accuracy: result.initialAccuracy,
@@ -34,6 +34,9 @@ export function submitProjectResult(teamId, teamToken, result) {
     p_wrong_count: result.wrongCount,
     p_improvement_count: result.improvementCount,
     p_participant_count: result.participantCount,
+    p_challenge_rounds: result.challengeRounds,
+    p_average_response_ms: result.averageResponseMs,
+    p_best_streak: result.bestStreak,
     p_reflection: result.reflection
   });
 }

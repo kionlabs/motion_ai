@@ -80,12 +80,18 @@
               <p class="eyebrow">STEP 4 · PROTOTYPE TEST</p><h2>사용자 상황으로 시험하세요</h2>
               <div class="product-preview" id="product-preview"><span class="preview-icon" id="preview-icon">🎮</span><strong id="preview-output">동작을 보여주세요</strong><small id="preview-detail">AI의 판단이 제품 반응으로 바뀝니다.</small></div>
               <div class="career-probabilities" id="career-probabilities"></div>
-              <div class="career-evaluation">
-                <div><span>사용자 테스트</span><strong id="career-test-accuracy">기록 없음</strong></div>
-                <p>원하는 반응이 나왔나요?</p>
-                <div class="evaluation-buttons"><button class="correct-button" id="career-correct-button" type="button">성공</button><button class="wrong-button" id="career-wrong-button" type="button">오류</button></div>
-                <small id="career-test-count">0회 시험</small>
-              </div>
+              <section class="career-challenge" id="career-challenge" data-scenario="game">
+                <div class="challenge-heading"><div><span>자동 사용자 테스트</span><strong id="challenge-title">미션을 시작하세요</strong></div><b id="challenge-round">0 / 10</b></div>
+                <div class="challenge-stage" id="challenge-stage">
+                  <span class="challenge-object" id="challenge-object" aria-hidden="true">◆</span>
+                  <p id="challenge-message">시작 버튼을 누르면 목표 동작이 무작위로 제시됩니다.</p>
+                  <strong id="challenge-target">준비</strong>
+                  <div class="challenge-hold"><i id="challenge-hold-bar"></i></div>
+                  <small id="challenge-timer">목표 동작을 0.7초간 유지하세요.</small>
+                </div>
+                <div class="challenge-stats"><span>성공<b id="challenge-correct">0</b></span><span>평균 반응<b id="challenge-response">-</b></span><span>연속 성공<b id="challenge-streak">0</b></span></div>
+                <button class="primary-button" id="challenge-start-button" type="button">10라운드 미션 시작</button>
+              </section>
               <label class="career-field"><span>발견한 오류 또는 개선 아이디어</span><textarea id="career-reflection" rows="3" maxlength="120" placeholder="예: 앉은 학생의 동작도 데이터에 추가해야 한다."></textarea></label>
               <button class="primary-button" id="career-report-button" type="button">제안 카드 만들기</button>
             </section>

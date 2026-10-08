@@ -68,12 +68,40 @@
 .career-probabilities { display: grid; gap: 10px; margin: 18px 0; }
 .career-probabilities label { display: grid; grid-template-columns: 92px 1fr 42px; align-items: center; gap: 9px; color: #b9c6d6; font-size: .8rem; }
 .career-probabilities b { text-align: right; }
-.career-evaluation { margin: 17px 0; padding: 15px; border: 1px solid #2d466d; border-radius: 15px; background: #09182e; }
-.career-evaluation > div:first-child { display: flex; justify-content: space-between; gap: 12px; }
-.career-evaluation > div:first-child span { color: #7dd3fc; font-size: .78rem; font-weight: 800; }
-.career-evaluation > div:first-child strong { font-size: 1.05rem; }
-.career-evaluation p { margin: 12px 0 9px; color: #9cadc2; font-size: .86rem; }
-.career-evaluation > small { display: block; margin-top: 8px; color: #7e91ab; text-align: right; }
+.career-challenge { margin: 17px 0; padding: 15px; border: 1px solid #2d466d; border-radius: 15px; background: #09182e; }
+.challenge-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.challenge-heading span, .challenge-heading strong { display: block; }
+.challenge-heading span { color: #7dd3fc; font-size: .73rem; font-weight: 850; }
+.challenge-heading strong { margin-top: 3px; font-size: 1.04rem; }
+.challenge-heading > b { color: #5eead4; }
+.challenge-stage { position: relative; overflow: hidden; min-height: 178px; display: grid; place-content: center; gap: 7px; margin: 13px 0; padding: 18px; border: 1px solid #294164; border-radius: 14px; background: radial-gradient(circle at 50% 20%,rgba(45,212,191,.14),transparent 58%),#071121; text-align: center; }
+.challenge-stage::before, .challenge-stage::after { content: ""; position: absolute; opacity: .25; pointer-events: none; }
+.challenge-object { color: #fbbf24; font-size: 2.35rem; filter: drop-shadow(0 0 12px rgba(251,191,36,.55)); transition: transform .25s,color .25s; }
+.challenge-stage p { margin: 0; color: #91a4bd; font-size: .79rem; }
+.challenge-stage > strong { color: #fff; font-size: 1.28rem; }
+.challenge-stage > small { color: #8194ad; }
+.challenge-hold { overflow: hidden; width: min(260px,100%); height: 8px; margin: 2px auto; border-radius: 999px; background: #1b3155; }
+.challenge-hold i { display: block; width: 0; height: 100%; border-radius: inherit; background: #5eead4; transition: width .08s linear; }
+.career-challenge[data-scenario="game"] .challenge-stage::before { inset: 18px 15%; border-block: 1px dashed #31517a; }
+.career-challenge[data-scenario="game"] .challenge-stage[data-target="a"] .challenge-object { transform: translateX(-95px); }
+.career-challenge[data-scenario="game"] .challenge-stage[data-target="b"] .challenge-object { transform: translateX(95px); }
+.career-challenge[data-scenario="stage"] .challenge-stage[data-target="a"] { box-shadow: inset 0 0 70px rgba(45,212,191,.2); }
+.career-challenge[data-scenario="stage"] .challenge-stage[data-target="b"] { box-shadow: inset 0 0 70px rgba(168,85,247,.24); }
+.career-challenge[data-scenario="stage"] .challenge-stage[data-target="c"] { filter: brightness(.72); }
+.career-challenge[data-scenario="accessibility"] .challenge-stage[data-target="a"] .challenge-object { transform: translateX(-70px); }
+.career-challenge[data-scenario="accessibility"] .challenge-stage[data-target="b"] .challenge-object { transform: translateX(70px); }
+.career-challenge[data-scenario="sports"] .challenge-stage[data-target="b"] .challenge-object { transform: scale(1.35); }
+.career-challenge[data-scenario="hospital"] .challenge-object { color: #fb7185; }
+.career-challenge[data-scenario="home"] .challenge-object { color: #fbbf24; }
+.career-challenge[data-scenario="stage"] .challenge-stage { background: radial-gradient(circle at 50% 10%,rgba(196,181,253,.34),transparent 52%),#100b24; }
+.career-challenge[data-scenario="stage"] .challenge-object { color: #c4b5fd; }
+.career-challenge[data-scenario="accessibility"] .challenge-object { color: #7dd3fc; }
+.career-challenge[data-scenario="sports"] .challenge-object { color: #4ade80; }
+.challenge-stage.success { border-color: #5eead4; background-color: #092b2c; }
+.challenge-stage.error { border-color: #fb7185; background-color: #2b1220; }
+.challenge-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 12px 0; }
+.challenge-stats span { padding: 9px; border-radius: 10px; background: #0d1e38; color: #8296b0; font-size: .7rem; text-align: center; }
+.challenge-stats b { display: block; margin-top: 3px; color: #fff; font-size: .94rem; }
 .career-report-modal { width: min(94vw,820px); }
 .career-report-sheet { padding: 34px; background: radial-gradient(circle at 100% 0,rgba(45,212,191,.13),transparent 260px),#09162a; }
 .report-client { display: flex; align-items: center; gap: 13px; margin: 22px 0 14px; padding: 15px 17px; border: 1px solid #294568; border-radius: 14px; background: #0d1e38; }

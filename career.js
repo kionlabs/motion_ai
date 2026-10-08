@@ -1,11 +1,15 @@
 import { DrawingUtils, FilesetResolver, PoseLandmarker } from "./vendor/vision_bundle.mjs";
-import { getLeaderboard, registerTeam, submitProjectResult } from "./supabase-client.js";
+import { getLeaderboard, registerTeam, submitChallengeResult } from "./supabase-client.js";
 
 const TARGET_SAMPLES = 25;
 const K_NEIGHBORS = 7;
 const STORAGE_KEY = "motion-ai-career-project-v1";
 const MEMBERSHIP_KEY = "motion-ai-class-membership-v1";
 const CLASS_IDS = ["a", "b", "c"];
+const CHALLENGE_ROUNDS = 10;
+const TARGET_HOLD_MS = 700;
+const WRONG_HOLD_MS = 1000;
+const ROUND_TIMEOUT_MS = 5000;
 
 const SCENARIOS = {
   game: {
@@ -88,6 +92,15 @@ const SCENARIOS = {
   }
 };
 
+const MISSIONS = {
+  game: { title: "에너지 코어 수집", object: "◆", prompt: "코어가 나타난 방향으로 캐릭터를 조종하세요." },
+  hospital: { title: "재활 자세 순서 확인", object: "✚", prompt: "화면에 제시된 재활 자세를 안전하게 유지하세요." },
+  home: { title: "핸즈프리 레시피 완성", object: "🍲", prompt: "요리 화면에 필요한 명령을 몸동작으로 보내세요." },
+  stage: { title: "댄스 조명 큐 맞추기", object: "✦", prompt: "무대 감독이 요청한 조명 신호를 동작으로 켜세요." },
+  accessibility: { title: "목표 메뉴 찾아가기", object: "◎", prompt: "이동과 선택 동작으로 원하는 메뉴를 찾아주세요." },
+  sports: { title: "운동 루틴 코칭", object: "●", prompt: "코치가 제시한 운동 단계를 순서대로 수행하세요." }
+};
+
 const elements = {
   grid: document.querySelector("#career-grid"),
   project: document.querySelector("#career-project"),
@@ -119,10 +132,19 @@ const elements = {
   previewIcon: document.querySelector("#preview-icon"),
   previewOutput: document.querySelector("#preview-output"),
   previewDetail: document.querySelector("#preview-detail"),
-  correctButton: document.querySelector("#career-correct-button"),
-  wrongButton: document.querySelector("#career-wrong-button"),
-  testAccuracy: document.querySelector("#career-test-accuracy"),
-  testCount: document.querySelector("#career-test-count"),
+  challenge: document.querySelector("#career-challenge"),
+  challengeTitle: document.querySelector("#challenge-title"),
+  challengeRound: document.querySelector("#challenge-round"),
+  challengeStage: document.querySelector("#challenge-stage"),
+  challengeObject: document.querySelector("#challenge-object"),
+  challengeMessage: document.querySelector("#challenge-message"),
+  challengeTarget: document.querySelector("#challenge-target"),
+  challengeHoldBar: document.querySelector("#challenge-hold-bar"),
+  challengeTimer: document.querySelector("#challenge-timer"),
+  challengeCorrect: document.querySelector("#challenge-correct"),
+  challengeResponse: document.querySelector("#challenge-response"),
+  challengeStreak: document.querySelector("#challenge-streak"),
+  challengeStartButton: document.querySelector("#challenge-start-button"),
   reflection: document.querySelector("#career-reflection"),
   reportButton: document.querySelector("#career-report-button"),
   reportDialog: document.querySelector("#career-report-dialog"),
@@ -163,12 +185,7 @@ const state = {
     b: Array.isArray(stored.samples?.b) ? stored.samples.b : [],
     c: Array.isArray(stored.samples?.c) ? stored.samples.c : []
   },
-  evaluation: {
-    correct: Number(stored.evaluation?.correct) || 0,
-    wrong: Number(stored.evaluation?.wrong) || 0
-  },
-  initialAccuracy: Number.isFinite(Number(stored.initialAccuracy)) ? Number(stored.initialAccuracy) : null,
-  improvementCount: Number(stored.improvementCount) || 0,
+  challengeHistory: Array.isArray(stored.challengeHistory) ? stored.challengeHistory : [],
   participantCount: Math.max(1, Math.min(20, Number(stored.participantCount) || 4)),
   reflection: typeof stored.reflection === "string" ? stored.reflection : ""
 };
@@ -184,6 +201,8 @@ let lastFeatures;
 let lastPrediction;
 let modelTrained = false;
 let isCollecting = false;
+let challengeRun;
+let challengeTimeout;
 
 function scenario() { return SCENARIOS[state.scenarioId]; }
 function saveState() { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -230,6 +249,26 @@ function renderMotionCards() {
   `).join("");
 }
 
+function renderChallengeIdle() {
+  const mission = MISSIONS[state.scenarioId];
+  const latest = state.challengeHistory.at(-1);
+  elements.challenge.dataset.scenario = state.scenarioId;
+  elements.challengeStage.dataset.target = "";
+  elements.challengeStage.classList.remove("success", "error");
+  elements.challengeTitle.textContent = mission.title;
+  elements.challengeObject.textContent = mission.object;
+  elements.challengeMessage.textContent = mission.prompt;
+  elements.challengeTarget.textContent = latest ? `최근 성공률 ${latest.accuracy}%` : "준비";
+  elements.challengeRound.textContent = latest ? `${latest.rounds}라운드 완료` : `0 / ${CHALLENGE_ROUNDS}`;
+  elements.challengeCorrect.textContent = latest?.correct ?? 0;
+  elements.challengeResponse.textContent = latest ? `${(latest.averageResponseMs / 1000).toFixed(1)}초` : "-";
+  elements.challengeStreak.textContent = latest?.bestStreak ?? 0;
+  elements.challengeHoldBar.style.width = "0%";
+  elements.challengeTimer.textContent = "목표 동작을 0.7초간 유지하세요.";
+  elements.challengeStartButton.textContent = latest ? "개선 후 다시 시험" : "10라운드 미션 시작";
+  elements.challengeStartButton.disabled = false;
+}
+
 function escapeAttribute(value) {
   return String(value).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
@@ -249,15 +288,13 @@ function renderProject() {
   elements.previewIcon.textContent = current.icon;
   renderMotionCards();
   updateCounts();
-  updateEvaluation();
+  renderChallengeIdle();
 }
 
 function resetProjectData() {
   CLASS_IDS.forEach((id) => { state.samples[id] = []; });
   state.gestures = {};
-  state.evaluation = { correct: 0, wrong: 0 };
-  state.initialAccuracy = null;
-  state.improvementCount = 0;
+  state.challengeHistory = [];
   state.reflection = "";
   modelTrained = false;
   lastPrediction = undefined;
@@ -374,6 +411,7 @@ function updatePrediction(prediction) {
     document.querySelector(`#career-prob-${id}`).value = percent;
     document.querySelector(`#career-prob-${id}-value`).textContent = `${percent}%`;
   });
+  processChallengePrediction(prediction, confident);
 }
 
 function drawPose(landmarks) {
@@ -449,6 +487,7 @@ async function startCamera() {
 }
 
 function stopCamera() {
+  cancelChallenge("카메라가 꺼져 미션을 중단했습니다.");
   cameraStream?.getTracks().forEach((track) => track.stop());
   cameraStream = undefined;
   elements.camera.srcObject = null;
@@ -471,44 +510,150 @@ async function trainPrototype() {
   elements.testPanel.hidden = false;
   setStep(4);
   setStatus("사용자 상황으로 프로토타입을 시험하세요", "ready");
+  renderChallengeIdle();
   if (lastFeatures) updatePrediction(classify(lastFeatures));
 }
 
 function resetSamples() {
-  const previousStats = getTestStats();
-  if (modelTrained && previousStats.total > 0) {
-    if (state.initialAccuracy === null) state.initialAccuracy = previousStats.accuracy;
-    state.improvementCount += 1;
-    state.evaluation = { correct: 0, wrong: 0 };
-  }
+  cancelChallenge("학습 데이터를 다시 모은 뒤 시험하세요.");
   CLASS_IDS.forEach((id) => { state.samples[id] = []; });
   modelTrained = false;
   lastPrediction = undefined;
   saveState();
   renderMotionCards();
   updateCounts();
+  elements.designPanel.hidden = false;
+  elements.testPanel.hidden = true;
   elements.predictionChip.hidden = true;
-  updateEvaluation();
   setStep(2);
 }
 
 function getTestStats() {
-  const total = state.evaluation.correct + state.evaluation.wrong;
-  return { total, accuracy: total ? Math.round((state.evaluation.correct / total) * 100) : null };
+  const latest = state.challengeHistory.at(-1);
+  return latest ? { total: latest.rounds, accuracy: latest.accuracy, ...latest } : { total: 0, accuracy: null, correct: 0, wrong: 0, averageResponseMs: 0, bestStreak: 0 };
 }
 
-function updateEvaluation() {
-  const stats = getTestStats();
-  elements.testAccuracy.textContent = stats.accuracy === null ? "기록 없음" : `성공률 ${stats.accuracy}%`;
-  elements.testCount.textContent = `${stats.total}회 시험`;
+function buildChallengeSequence() {
+  const fixed = {
+    hospital: ["c", "a", "c", "b", "c", "a", "b", "c", "b", "a"],
+    home: ["b", "b", "c", "a", "b", "c", "b", "a", "b", "c"],
+    accessibility: ["b", "b", "a", "c", "b", "a", "a", "b", "b", "c"],
+    sports: ["a", "b", "c", "a", "b", "c", "a", "b", "c", "b"]
+  };
+  if (fixed[state.scenarioId]) return fixed[state.scenarioId];
+  const sequence = [];
+  while (sequence.length < CHALLENGE_ROUNDS) {
+    const choices = CLASS_IDS.filter((id) => id !== sequence.at(-1));
+    sequence.push(choices[Math.floor(Math.random() * choices.length)]);
+  }
+  return sequence;
 }
 
-function recordTest(correct) {
-  state.evaluation[correct ? "correct" : "wrong"] += 1;
-  const stats = getTestStats();
-  if (stats.total === 5 && state.initialAccuracy === null) state.initialAccuracy = stats.accuracy;
+async function startChallenge() {
+  if (!modelTrained || !cameraStream) { setStatus("학습을 마치고 카메라를 켠 뒤 미션을 시작하세요", "error"); return; }
+  cancelChallenge();
+  challengeRun = { sequence: buildChallengeSequence(), index: -1, results: [], currentStreak: 0, bestStreak: 0, resolving: false };
+  elements.challengeStartButton.disabled = true;
+  elements.challengeStage.classList.remove("success", "error");
+  elements.challengeMessage.textContent = "3초 뒤 자동 판정이 시작됩니다.";
+  for (let count = 3; count >= 1; count -= 1) {
+    elements.challengeTarget.textContent = count;
+    await delay(650);
+    if (!challengeRun) return;
+  }
+  beginChallengeRound();
+}
+
+function beginChallengeRound() {
+  if (!challengeRun) return;
+  challengeRun.index += 1;
+  if (challengeRun.index >= CHALLENGE_ROUNDS) { finishChallenge(); return; }
+  challengeRun.targetId = challengeRun.sequence[challengeRun.index];
+  challengeRun.roundStartedAt = performance.now();
+  challengeRun.matchSince = 0;
+  challengeRun.wrongSince = 0;
+  challengeRun.resolving = false;
+  const command = scenario().commands.find((item) => item.id === challengeRun.targetId);
+  elements.challengeStage.classList.remove("success", "error");
+  elements.challengeStage.dataset.target = challengeRun.targetId;
+  elements.challengeRound.textContent = `${challengeRun.index + 1} / ${CHALLENGE_ROUNDS}`;
+  elements.challengeMessage.textContent = MISSIONS[state.scenarioId].prompt;
+  elements.challengeTarget.textContent = command.action;
+  elements.challengeTimer.textContent = "5초 안에 목표 동작을 보여주세요.";
+  elements.challengeHoldBar.style.width = "0%";
+  clearTimeout(challengeTimeout);
+  challengeTimeout = window.setTimeout(() => resolveChallengeRound(false, "시간 초과"), ROUND_TIMEOUT_MS);
+}
+
+function processChallengePrediction(prediction, confident) {
+  if (!challengeRun || challengeRun.resolving || !challengeRun.targetId) return;
+  const now = performance.now();
+  if (!confident) {
+    challengeRun.matchSince = 0;
+    challengeRun.wrongSince = 0;
+    elements.challengeHoldBar.style.width = "0%";
+    return;
+  }
+  if (prediction.classId === challengeRun.targetId) {
+    challengeRun.wrongSince = 0;
+    if (!challengeRun.matchSince) challengeRun.matchSince = now;
+    const progress = Math.min(100, ((now - challengeRun.matchSince) / TARGET_HOLD_MS) * 100);
+    elements.challengeHoldBar.style.width = `${progress}%`;
+    if (progress >= 100) resolveChallengeRound(true, prediction.classId);
+  } else {
+    challengeRun.matchSince = 0;
+    elements.challengeHoldBar.style.width = "0%";
+    if (!challengeRun.wrongSince) challengeRun.wrongSince = now;
+    if (now - challengeRun.wrongSince >= WRONG_HOLD_MS) resolveChallengeRound(false, prediction.classId);
+  }
+}
+
+function resolveChallengeRound(success, predicted) {
+  if (!challengeRun || challengeRun.resolving) return;
+  challengeRun.resolving = true;
+  clearTimeout(challengeTimeout);
+  const responseMs = Math.min(ROUND_TIMEOUT_MS, Math.round(performance.now() - challengeRun.roundStartedAt));
+  challengeRun.results.push({ target: challengeRun.targetId, predicted, success, responseMs });
+  challengeRun.currentStreak = success ? challengeRun.currentStreak + 1 : 0;
+  challengeRun.bestStreak = Math.max(challengeRun.bestStreak, challengeRun.currentStreak);
+  const correct = challengeRun.results.filter((result) => result.success).length;
+  const average = Math.round(challengeRun.results.reduce((sum, result) => sum + result.responseMs, 0) / challengeRun.results.length);
+  elements.challengeCorrect.textContent = correct;
+  elements.challengeResponse.textContent = `${(average / 1000).toFixed(1)}초`;
+  elements.challengeStreak.textContent = challengeRun.bestStreak;
+  elements.challengeHoldBar.style.width = success ? "100%" : "0%";
+  elements.challengeStage.classList.add(success ? "success" : "error");
+  elements.challengeTarget.textContent = success ? "성공!" : "다시 학습할 장면 발견";
+  elements.challengeTimer.textContent = success ? "목표 동작을 자동으로 확인했습니다." : predicted === "시간 초과" ? "제한시간 안에 동작을 찾지 못했습니다." : "다른 동작이 1초 이상 인식됐습니다.";
+  window.setTimeout(beginChallengeRound, 850);
+}
+
+function finishChallenge() {
+  clearTimeout(challengeTimeout);
+  const results = challengeRun.results;
+  const correct = results.filter((result) => result.success).length;
+  const averageResponseMs = Math.round(results.reduce((sum, result) => sum + result.responseMs, 0) / results.length);
+  const summary = { rounds: results.length, correct, wrong: results.length - correct, accuracy: Math.round((correct / results.length) * 100), averageResponseMs, bestStreak: challengeRun.bestStreak, completedAt: new Date().toISOString() };
+  state.challengeHistory.push(summary);
+  state.challengeHistory = state.challengeHistory.slice(-5);
   saveState();
-  updateEvaluation();
+  challengeRun = undefined;
+  elements.challengeRound.textContent = `${summary.rounds}라운드 완료`;
+  elements.challengeMessage.textContent = `${MISSIONS[state.scenarioId].title} 결과`;
+  elements.challengeTarget.textContent = `성공률 ${summary.accuracy}%`;
+  elements.challengeTimer.textContent = `평균 반응 ${(summary.averageResponseMs / 1000).toFixed(1)}초 · 최고 연속 ${summary.bestStreak}회`;
+  elements.challengeStartButton.disabled = false;
+  elements.challengeStartButton.textContent = "개선 후 다시 시험";
+  setStatus("자동 사용자 테스트 완료", "ready");
+}
+
+function cancelChallenge(message = "") {
+  clearTimeout(challengeTimeout);
+  if (!challengeRun) return;
+  challengeRun = undefined;
+  elements.challengeStartButton.disabled = false;
+  elements.challengeHoldBar.style.width = "0%";
+  if (message) elements.challengeTimer.textContent = message;
 }
 
 function updateReport() {
@@ -523,7 +668,7 @@ function updateReport() {
   elements.reportCompany.textContent = current.company;
   elements.reportProjectTitle.textContent = current.title;
   elements.reportTeamName.textContent = teamName;
-  elements.reportAccuracy.textContent = stats.accuracy === null ? "기록 없음" : `${stats.accuracy}%`;
+  elements.reportAccuracy.textContent = stats.accuracy === null ? "기록 없음" : `${stats.accuracy}% · ${(stats.averageResponseMs / 1000).toFixed(1)}초`;
   elements.reportProblem.textContent = current.problem;
   elements.reportMotions.innerHTML = current.commands.map((command) => `
     <div class="report-motion"><span>${command.action}</span><strong>${escapeAttribute(state.gestures[command.id] || command.gesture)}</strong><small>${state.samples[command.id].length}개 학습</small></div>
@@ -577,18 +722,21 @@ async function submitToRanking() {
     elements.classCode.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
-  if (!stats.total) { setStatus("사용자 시험을 한 번 이상 기록하세요", "error"); return; }
+  if (stats.total < CHALLENGE_ROUNDS) { setStatus("10라운드 자동 미션을 먼저 완료하세요", "error"); return; }
 
   elements.submitButton.disabled = true;
   elements.submitButton.textContent = "제출 중…";
   try {
-    const response = await submitProjectResult(membership.teamId, membership.teamToken, {
-      initialAccuracy: state.initialAccuracy ?? stats.accuracy,
+    const response = await submitChallengeResult(membership.teamId, membership.teamToken, {
+      initialAccuracy: state.challengeHistory[0]?.accuracy ?? stats.accuracy,
       finalAccuracy: stats.accuracy,
-      correctCount: state.evaluation.correct,
-      wrongCount: state.evaluation.wrong,
-      improvementCount: state.improvementCount,
+      correctCount: stats.correct,
+      wrongCount: stats.wrong,
+      improvementCount: Math.max(0, state.challengeHistory.length - 1),
       participantCount: state.participantCount,
+      challengeRounds: stats.rounds,
+      averageResponseMs: stats.averageResponseMs,
+      bestStreak: stats.bestStreak,
       reflection: state.reflection
     });
     const result = Array.isArray(response) ? response[0] : response;
@@ -615,7 +763,7 @@ function renderLeaderboard(rows) {
       <div class="ranking-team"><strong>${escapeAttribute(row.team_name)}</strong><small>${item?.icon || "🤖"} ${item?.company || "모션AI 프로젝트"}</small></div>
       <div class="ranking-metric">정확도<b>${row.final_accuracy}%</b></div>
       <div class="ranking-metric">개선<b>+${row.improvement}%p</b></div>
-      <div class="ranking-metric">시험<b>${row.test_count}회</b></div>
+      <div class="ranking-metric">미션<b>${row.challenge_rounds ?? row.test_count}회</b></div>
       <strong class="ranking-score">${row.total_score}점</strong>
     </article>`;
   }).join("");
@@ -673,8 +821,7 @@ elements.changeCareerButton.addEventListener("click", () => { stopCamera(); elem
 elements.cameraButton.addEventListener("click", toggleCamera);
 elements.trainButton.addEventListener("click", trainPrototype);
 elements.resetButton.addEventListener("click", resetSamples);
-elements.correctButton.addEventListener("click", () => recordTest(true));
-elements.wrongButton.addEventListener("click", () => recordTest(false));
+elements.challengeStartButton.addEventListener("click", startChallenge);
 elements.reportButton.addEventListener("click", openReport);
 elements.reportClose.addEventListener("click", () => elements.reportDialog.close());
 elements.joinButton.addEventListener("click", joinLiveClass);

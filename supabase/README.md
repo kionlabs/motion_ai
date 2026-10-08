@@ -1,6 +1,6 @@
 # Supabase 설정
 
-1. Supabase Dashboard의 **SQL Editor**에서 `migrations/202610080001_motion_ai_schema.sql` 전체를 실행합니다.
+1. Supabase Dashboard의 **SQL Editor**에서 `migrations` 폴더의 SQL을 파일명 순서대로 실행합니다.
 2. **Settings → API → Exposed schemas**에 `motion_ai`를 추가합니다.
 3. SQL Editor에서 수업을 하나 만듭니다.
 
@@ -26,8 +26,9 @@ select motion_ai.create_class_session(
 
 - 정확도: 30점
 - 개선 효과: 25점
-- 사용자 시험 횟수: 20점
+- 자동 미션 완주: 10점
+- 연속 성공: 10점
 - 교사 동작 설계 평가: 15점
 - 교사 데이터 다양성 평가: 10점
 
-웹앱은 앞의 75점을 자동 계산합니다. 교사 평가 25점은 후속 교사용 화면에서 입력하도록 분리했습니다.
+정확도 30점, 개선 효과 25점, 자동 미션 완주 10점, 연속 성공 10점으로 75점을 자동 계산합니다. 교사 평가 25점은 후속 교사용 화면에서 입력하도록 분리했습니다.
