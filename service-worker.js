@@ -1,4 +1,4 @@
-const CACHE_NAME = "motion-ai-classroom-v5";
+const CACHE_NAME = "motion-ai-classroom-v6";
 const APP_SHELL = [
   "./",
   "./index.html",

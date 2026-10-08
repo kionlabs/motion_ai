@@ -203,6 +203,7 @@ let modelTrained = false;
 let isCollecting = false;
 let challengeRun;
 let challengeTimeout;
+let rankingRefreshTimer;
 
 function scenario() { return SCENARIOS[state.scenarioId]; }
 function saveState() { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -758,25 +759,27 @@ function renderLeaderboard(rows) {
   }
   elements.rankingList.innerHTML = rows.map((row) => {
     const item = SCENARIOS[row.scenario_id];
-    return `<article class="ranking-row${Number(row.rank) <= 3 ? " top" : ""}">
-      <span class="ranking-rank">${row.rank}위</span>
+    const pending = row.submission_status === "in_progress";
+    return `<article class="ranking-row${pending ? " pending" : Number(row.rank) <= 3 ? " top" : ""}">
+      <span class="ranking-rank">${pending ? "진행 중" : `${row.rank}위`}</span>
       <div class="ranking-team"><strong>${escapeAttribute(row.team_name)}</strong><small>${item?.icon || "🤖"} ${item?.company || "모션AI 프로젝트"}</small></div>
-      <div class="ranking-metric">정확도<b>${row.final_accuracy}%</b></div>
-      <div class="ranking-metric">개선<b>+${row.improvement}%p</b></div>
-      <div class="ranking-metric">미션<b>${row.challenge_rounds ?? row.test_count}회</b></div>
-      <strong class="ranking-score">${row.total_score}점</strong>
+      ${pending ? '<strong class="ranking-progress">미션 결과 제출 대기</strong>' : `
+        <div class="ranking-metric">정확도<b>${row.final_accuracy}%</b></div>
+        <div class="ranking-metric">개선<b>+${row.improvement}%p</b></div>
+        <div class="ranking-metric">미션<b>${row.challenge_rounds ?? row.test_count}회</b></div>
+        <strong class="ranking-score">${row.total_score}점</strong>`}
     </article>`;
   }).join("");
 }
 
-async function refreshLeaderboard() {
+async function refreshLeaderboard(silent = false) {
   const classCode = (elements.classCode.value.trim() || membership?.classCode || "").toUpperCase();
   if (!classCode) {
     elements.rankingList.innerHTML = '<p class="empty-ranking">교사가 알려준 수업 코드를 먼저 입력하세요.</p>';
     return;
   }
   elements.rankingRefresh.disabled = true;
-  elements.rankingList.innerHTML = '<p class="empty-ranking">랭킹을 불러오는 중입니다…</p>';
+  if (!silent) elements.rankingList.innerHTML = '<p class="empty-ranking">랭킹을 불러오는 중입니다…</p>';
   try { renderLeaderboard(await getLeaderboard(classCode)); }
   catch (error) { elements.rankingList.innerHTML = `<p class="empty-ranking">${escapeAttribute(error.message)}</p>`; }
   finally { elements.rankingRefresh.disabled = false; }
@@ -785,6 +788,14 @@ async function refreshLeaderboard() {
 function openLeaderboard() {
   elements.rankingDialog.showModal();
   refreshLeaderboard();
+  clearInterval(rankingRefreshTimer);
+  rankingRefreshTimer = window.setInterval(() => refreshLeaderboard(true), 5000);
+}
+
+function closeLeaderboard() {
+  clearInterval(rankingRefreshTimer);
+  rankingRefreshTimer = undefined;
+  elements.rankingDialog.close();
 }
 
 async function setupOfflineMode() {
@@ -827,8 +838,9 @@ elements.reportClose.addEventListener("click", () => elements.reportDialog.close
 elements.joinButton.addEventListener("click", joinLiveClass);
 elements.submitButton.addEventListener("click", submitToRanking);
 elements.rankingButton.addEventListener("click", openLeaderboard);
-elements.rankingRefresh.addEventListener("click", refreshLeaderboard);
-elements.rankingClose.addEventListener("click", () => elements.rankingDialog.close());
+elements.rankingRefresh.addEventListener("click", () => refreshLeaderboard());
+elements.rankingClose.addEventListener("click", closeLeaderboard);
+elements.rankingDialog.addEventListener("close", () => clearInterval(rankingRefreshTimer));
 elements.printButton.addEventListener("click", () => window.print());
 window.addEventListener("online", () => setOfflineBadge("오프라인 준비 완료", "ready"));
 window.addEventListener("offline", () => setOfflineBadge("오프라인 실행 중", "offline"));
