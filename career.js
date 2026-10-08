@@ -753,11 +753,8 @@ async function submitToRanking() {
 }
 
 function renderLeaderboard(rows) {
-  if (!rows.length) {
-    elements.rankingList.innerHTML = '<p class="empty-ranking">아직 제출된 모둠 결과가 없습니다.</p>';
-    return;
-  }
-  elements.rankingList.innerHTML = rows.map((row) => {
+  const visibleRows = rows.slice(0, 10);
+  const renderedRows = visibleRows.map((row) => {
     const item = SCENARIOS[row.scenario_id];
     const pending = row.submission_status === "in_progress";
     return `<article class="ranking-row${pending ? " pending" : Number(row.rank) <= 3 ? " top" : ""}">
@@ -769,7 +766,15 @@ function renderLeaderboard(rows) {
         <div class="ranking-metric">미션<b>${row.challenge_rounds ?? row.test_count}회</b></div>
         <strong class="ranking-score">${row.total_score}점</strong>`}
     </article>`;
-  }).join("");
+  });
+  for (let position = visibleRows.length + 1; position <= 10; position += 1) {
+    renderedRows.push(`<article class="ranking-row placeholder">
+      <span class="ranking-rank">${position}위</span>
+      <div class="ranking-team"><strong>참가·결과 대기</strong><small>모둠 결과가 제출되면 자동으로 표시됩니다.</small></div>
+      <strong class="ranking-progress">-</strong>
+    </article>`);
+  }
+  elements.rankingList.innerHTML = renderedRows.join("");
 }
 
 async function refreshLeaderboard(silent = false) {
