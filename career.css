@@ -172,3 +172,174 @@
   .report-motion strong { color: #111827; }
   .report-problem, .report-reflection { background: #ecfdf5; }
 }
+
+@media screen {
+  .back-link {
+    border-color: var(--kion-line);
+    background: #fff;
+    color: var(--kion-navy);
+  }
+  .career-intro > div > p:last-child,
+  .class-sync-panel > div > p:last-child,
+  .sync-message,
+  .career-card p,
+  .project-brief p:last-child,
+  .career-motion-title small,
+  .career-motion-count,
+  .product-preview small,
+  .challenge-stage p,
+  .challenge-stage > small,
+  .ranking-note,
+  .ranking-team small,
+  .ranking-metric,
+  .empty-ranking { color: var(--kion-muted); }
+  .career-time {
+    border-color: #c6d9df;
+    background: #edf6f7;
+  }
+  .career-time span { color: var(--kion-muted); }
+  .career-time strong { color: var(--kion-teal-dark); }
+  .class-sync-panel,
+  .project-brief {
+    border-color: var(--kion-line);
+    background: linear-gradient(110deg,#edf6f7,#fff 62%);
+    box-shadow: 0 12px 32px rgba(11,61,105,.06);
+  }
+  .class-sync-panel label,
+  .career-field { color: var(--kion-muted); }
+  .class-sync-panel input,
+  .career-field input,
+  .career-field textarea,
+  .career-motion-bottom input {
+    border-color: #c7d4df;
+    background: #fff;
+    color: var(--kion-navy);
+  }
+  .class-sync-panel input:focus,
+  .career-field input:focus,
+  .career-field textarea:focus {
+    border-color: var(--kion-teal);
+    box-shadow: 0 0 0 3px rgba(120,169,178,.2);
+  }
+  .sync-message.success { color: var(--kion-teal-dark); }
+  .sync-message.error { color: #c84f4f; }
+  .career-card {
+    border-color: var(--kion-line);
+    background: #fff;
+    color: var(--kion-navy);
+    box-shadow: 0 10px 28px rgba(11,61,105,.07);
+  }
+  .career-card:hover {
+    border-color: var(--kion-teal);
+    background: #f9fcfc;
+    box-shadow: 0 16px 34px rgba(11,61,105,.12);
+  }
+  .career-card.active {
+    border-color: var(--kion-coral);
+    box-shadow: 0 0 0 3px rgba(255,136,115,.16),0 16px 34px rgba(11,61,105,.1);
+  }
+  .career-card small { color: var(--kion-coral-hover); }
+  .project-symbol { background: #dcecf0; }
+  .career-workspace {
+    border-color: var(--kion-line);
+    background: #fff;
+    box-shadow: 0 24px 65px rgba(11,61,105,.13);
+  }
+  .career-camera-panel { background: var(--kion-navy); }
+  .career-control-panel { background: #fff; }
+  .user-brief {
+    border-color: var(--kion-coral);
+    background: #fff2ef;
+  }
+  .user-brief span { color: var(--kion-coral-hover); }
+  .user-brief p { color: #486985; }
+  .user-brief strong { color: var(--kion-navy); }
+  .career-motion-card {
+    border-color: var(--kion-line);
+    background: var(--kion-soft);
+  }
+  .career-motion-card.collecting {
+    border-color: var(--kion-teal);
+    background: #edf6f7;
+  }
+  .career-motion-key {
+    background: #dcecf0;
+    color: var(--kion-teal-dark);
+  }
+  .career-motion-count b { color: var(--kion-navy); }
+  .career-motion-bottom button {
+    border-color: #b7c9d8;
+    background: #fff;
+    color: var(--kion-navy);
+  }
+  .product-preview {
+    border-color: var(--kion-teal);
+    background: radial-gradient(circle at 50% 25%,rgba(120,169,178,.18),transparent 52%),#f8fbfc;
+  }
+  .product-preview[data-command="a"] { border-color: var(--kion-teal); background-color: #edf6f7; }
+  .product-preview[data-command="b"] { border-color: var(--kion-coral); background-color: #fff2ef; }
+  .product-preview[data-command="c"] { border-color: #efbf65; background-color: #fff9ec; }
+  .career-probabilities label { color: #486985; }
+  .career-challenge {
+    border-color: var(--kion-line);
+    background: var(--kion-soft);
+  }
+  .challenge-heading span { color: var(--kion-coral-hover); }
+  .challenge-heading > b { color: var(--kion-teal-dark); }
+  .challenge-stage {
+    border-color: #c9d9e3;
+    background: radial-gradient(circle at 50% 20%,rgba(120,169,178,.14),transparent 58%),#fff;
+  }
+  .challenge-stage > strong { color: var(--kion-navy); }
+  .challenge-hold { background: #dfe7ed; }
+  .challenge-hold i { background: var(--kion-coral); }
+  .career-challenge[data-scenario="game"] .challenge-stage::before { border-color: #a8c0d0; }
+  .career-challenge[data-scenario="stage"] .challenge-stage { background: radial-gradient(circle at 50% 10%,rgba(120,169,178,.2),transparent 52%),#f7f9fc; }
+  .challenge-stage.success { border-color: var(--kion-teal); background-color: #edf6f7; }
+  .challenge-stage.error { border-color: var(--kion-coral); background-color: #fff2ef; }
+  .challenge-stats span {
+    background: #eaf0f4;
+    color: var(--kion-muted);
+  }
+  .challenge-stats b { color: var(--kion-navy); }
+  .career-report-sheet,
+  .ranking-sheet { background: #fff; }
+  .report-client,
+  .report-team strong,
+  .report-motion,
+  .ranking-row {
+    border-color: var(--kion-line);
+    background: var(--kion-soft);
+    color: var(--kion-navy);
+  }
+  .report-client small,
+  .report-problem span,
+  .report-reflection span { color: var(--kion-coral-hover); }
+  .report-team span,
+  .report-motion span,
+  .report-motion small { color: var(--kion-muted); }
+  .report-problem,
+  .report-reflection {
+    border-color: var(--kion-coral);
+    background: #fff2ef;
+  }
+  .report-problem p,
+  .report-reflection p { color: #486985; }
+  .report-motion strong { color: var(--kion-navy); }
+  .report-pitch {
+    border-color: var(--kion-coral);
+    background: #fff2ef;
+    color: var(--kion-navy);
+  }
+  .ranking-row.top {
+    border-color: var(--kion-coral);
+    background: linear-gradient(100deg,rgba(255,136,115,.13),#fff 48%);
+  }
+  .ranking-row.pending { border-color: var(--kion-teal); }
+  .ranking-rank { color: var(--kion-teal-dark); }
+  .ranking-row.pending .ranking-rank { color: var(--kion-muted); }
+  .ranking-progress { color: var(--kion-teal-dark); }
+  .ranking-metric b { color: var(--kion-navy); }
+  .ranking-score { color: var(--kion-coral-hover); }
+  .empty-ranking { border-color: #b9cbd7; }
+}

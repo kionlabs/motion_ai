@@ -172,3 +172,85 @@ progress::-moz-progress-bar { border-radius: 999px; background: #5eead4; }
   .sheet-top > span, .group-summary span, .comparison article span, .comparison article small, .sheet-metrics span, .sheet-conclusion p { color: #475569; }
   .modal-actions { display: none !important; }
 }
+
+@media screen {
+  :root {
+    color-scheme: light;
+    --kion-navy: #0b3d69;
+    --kion-navy-dark: #072f55;
+    --kion-teal: #78a9b2;
+    --kion-teal-dark: #397b86;
+    --kion-coral: #ff8873;
+    --kion-coral-hover: #f67560;
+    --kion-mist: #f0f4f8;
+    --kion-soft: #f8fafc;
+    --kion-line: #d9e3eb;
+    --kion-muted: #607d96;
+    background: var(--kion-mist);
+    color: var(--kion-navy);
+    font-family: Inter, "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+  }
+  body { background: radial-gradient(circle at 92% 8%,rgba(120,169,178,.2),transparent 28rem),linear-gradient(180deg,#f0f4f8 0,#fff 42%,#f7f9fb 100%); color: var(--kion-navy); }
+  h1, h2, h3, .result-name strong, .sheet-top h2 { color: var(--kion-navy); font-family: Outfit, Inter, "Pretendard", sans-serif; letter-spacing: -.025em; }
+  .eyebrow { color: var(--kion-coral); }
+  .eyebrow a { color: var(--kion-navy); text-decoration: none; }
+  .eyebrow a:hover { color: var(--kion-coral); }
+  .status, .offline-badge { border-color: var(--kion-line); background: rgba(255,255,255,.88); color: var(--kion-muted); box-shadow: 0 6px 22px rgba(11,61,105,.06); }
+  .status-dot, .offline-badge i { background: var(--kion-coral); box-shadow: 0 0 8px rgba(255,136,115,.5); }
+  .status.ready .status-dot, .offline-badge[data-state="ready"] i, .offline-badge[data-state="offline"] i { background: var(--kion-teal); box-shadow: 0 0 8px rgba(120,169,178,.55); }
+  .offline-badge[data-state="ready"], .offline-badge[data-state="offline"] { border-color: #bfd4d9; color: var(--kion-teal-dark); }
+  .group-button, .career-link { border-color: var(--kion-line); background: #fff; color: var(--kion-navy); box-shadow: 0 6px 18px rgba(11,61,105,.06); }
+  .career-link { border-color: var(--kion-coral); background: var(--kion-coral); color: #fff; }
+  .group-button:hover { border-color: var(--kion-teal); }
+  .career-link:hover { background: var(--kion-coral-hover); }
+  .step { border-color: var(--kion-line); background: rgba(255,255,255,.82); color: #7790a5; }
+  .step b { background: #e4ebf1; color: var(--kion-navy); }
+  .step.active { border-color: var(--kion-coral); color: var(--kion-navy); background: #fff; box-shadow: 0 7px 20px rgba(255,136,115,.1); }
+  .step.active b { background: var(--kion-coral); color: #fff; }
+  .step.done { color: var(--kion-teal-dark); }
+  .step.done b { background: #d8eaed; color: var(--kion-teal-dark); }
+  .workspace { border-color: var(--kion-line); background: #fff; box-shadow: 0 24px 65px rgba(11,61,105,.13); }
+  .camera-panel { background: var(--kion-navy); }
+  .camera-frame { border-color: #315f85; background: linear-gradient(145deg,#174e77,#072f55); }
+  .camera-placeholder { color: #c7d7e4; }
+  .camera-placeholder strong { color: #fff; }
+  .body-mark { color: var(--kion-coral); text-shadow: 0 0 28px rgba(255,136,115,.48); }
+  .prediction-chip { background: rgba(7,47,85,.85); }
+  .countdown { border-color: var(--kion-coral); background: rgba(7,47,85,.9); box-shadow: 0 0 55px rgba(255,136,115,.34); }
+  .control-panel { background: #fff; }
+  .intro, .camera-help { color: var(--kion-muted); }
+  .check-list li { border-color: var(--kion-line); color: var(--kion-navy); }
+  .check-list b { color: var(--kion-muted); }
+  .check-list .pass { color: var(--kion-teal-dark); }
+  .notice { border-color: #cbdde2; background: #eef5f6; }
+  .notice strong { color: var(--kion-navy); }
+  .notice p { color: var(--kion-muted); }
+  .primary-button { background: var(--kion-coral); color: #fff; box-shadow: 0 9px 22px rgba(255,136,115,.2); }
+  .primary-button:hover:not(:disabled) { background: var(--kion-coral-hover); }
+  .secondary-button { border-color: #b8c9d7; background: #fff; color: var(--kion-navy); }
+  .class-card, .evaluation-card, .mission-stats span, .comparison article, .sheet-metrics div { border-color: var(--kion-line); background: var(--kion-soft); color: var(--kion-navy); }
+  .class-card.collecting { border-color: var(--kion-teal); background: #edf6f7; }
+  .class-card small, .sample-count, .evaluation-card p, .sheet-metrics span { color: var(--kion-muted); }
+  .class-icon { background: #dcecf0; color: var(--kion-teal-dark); }
+  .sample-count b { color: var(--kion-navy); }
+  .class-card button { border-color: #b7c9d8; background: #fff; color: var(--kion-navy); }
+  .feedback, .game-command { color: var(--kion-teal-dark); }
+  .result-name, .game-result, .comparison article.after { border-color: var(--kion-teal); background: #edf6f7; }
+  .result-name span, .game-result p { color: var(--kion-muted); }
+  progress, progress::-webkit-progress-bar { background: #dfe7ed; }
+  progress::-webkit-progress-value, progress::-moz-progress-bar { background: var(--kion-coral); }
+  .modal { border-color: var(--kion-line); background: #fff; color: var(--kion-navy); box-shadow: 0 30px 90px rgba(7,47,85,.22); }
+  .modal::backdrop { background: rgba(7,47,85,.48); }
+  .modal form, .result-sheet, .modal-actions { background: #fff; }
+  .icon-button { border-color: var(--kion-line); background: var(--kion-mist); color: var(--kion-navy); }
+  .field { color: var(--kion-muted); }
+  .field input { border-color: #c7d4df; background: #fff; color: var(--kion-navy); }
+  .field input:focus { border-color: var(--kion-teal); box-shadow: 0 0 0 3px rgba(120,169,178,.2); }
+  .reset-zone { border-color: var(--kion-line); }
+  .reset-zone p { color: var(--kion-muted); }
+  .group-summary { border-color: var(--kion-line); background: var(--kion-mist); }
+  .group-summary span, .comparison article span, .comparison article small, .sheet-top > span { color: var(--kion-muted); }
+  .sheet-conclusion { border-color: var(--kion-coral); background: #fff2ef; }
+  .sheet-conclusion span { color: var(--kion-coral-hover); }
+  .sheet-conclusion p { color: #486985; }
+}
