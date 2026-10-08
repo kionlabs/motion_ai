@@ -76,6 +76,10 @@ npm run build
 
 완성된 정적 파일은 `dist` 폴더에 생성되며 Git에는 포함하지 않습니다.
 
+## Vercel 배포
+
+`vercel.json`이 프레임워크 자동 감지를 끄고 `npm run build` 결과인 `dist` 폴더를 정적 사이트로 배포하도록 고정합니다. Vercel 프로젝트는 저장소 루트를 Root Directory로 사용해야 합니다.
+
 ## 학생용 QR 코드
 
 학생용 접속 주소는 `https://kionlabs.github.io/motion_ai/`입니다. 교실 화면 공유에는
